@@ -1,0 +1,4 @@
+# Streamlit 配置(按运行目录查找: Makefile 从 repo root 启动 make st)
+[client]
+# 正式环境隐藏右上角开发者选项(deploy / rerun / clear cache), 保留打印/主题等 viewer 项
+toolbarMode = "viewer"
