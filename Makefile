@@ -31,6 +31,9 @@ api:
 web:
 	pnpm --filter @data-platform/dashboard dev
 
+st:
+	uv run streamlit run apps/streamlit-dashboard/src/streamlit_dashboard/app.py --server.port 8002
+
 build:
 	pnpm run build
 

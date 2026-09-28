@@ -5,7 +5,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [tool.uv.workspace]
-members = ["apps/etl", "apps/training", "apps/api", "packages/data-core"]
+members = ["apps/etl", "apps/training", "apps/api", "apps/streamlit-dashboard", "packages/data-core"]
 
 [tool.uv.sources]
 data-core = { workspace = true }

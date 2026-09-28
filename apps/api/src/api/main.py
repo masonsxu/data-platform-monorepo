@@ -9,12 +9,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import polars as pl
+from data_core import queries
 from data_core.engine import Engine
 from data_core.lake import lake_config
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
-from api import queries
 
 app = FastAPI(title="data-platform api")
 engine = Engine()
@@ -83,7 +83,7 @@ if _dist.exists():
 
     @app.exception_handler(404)
     async def spa_fallback(request, exc):  # noqa: ANN001
-        from fastapi.responses import FileResponse, JSONResponse
+        from fastapi.responses import JSONResponse
 
         if request.url.path.startswith("/api"):
             return JSONResponse({"detail": "Not Found"}, status_code=404)
@@ -91,8 +91,6 @@ if _dist.exists():
 
     @app.get("/{path:path}", include_in_schema=False)
     async def spa_root(path: str) -> FileResponse:
-        from fastapi.responses import FileResponse
-
         if path.startswith("api"):
             raise HTTPException(status_code=404, detail="Not Found")
         target = _dist / path
