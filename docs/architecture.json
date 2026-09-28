@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Data Platform Demo · 数据流",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "output": "docs/architecture.html",
+    "viewBox": [
+      1068,
+      640
+    ]
+  },
+  "stages": [
+    {
+      "label": "Sources 数据源"
+    },
+    {
+      "label": "Ingest 入湖"
+    },
+    {
+      "label": "Transform 转换"
+    },
+    {
+      "label": "Query 查询层"
+    },
+    {
+      "label": "Consume 消费"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "混合数据源",
+      "sublabel": "文件+数据库",
+      "stage": 0,
+      "row": 1,
+      "tag": "约 1 GB"
+    },
+    {
+      "id": "raw",
+      "type": "database",
+      "label": "lake/raw",
+      "sublabel": "不可变原始层",
+      "stage": 1,
+      "row": 1,
+      "tag": "immutable"
+    },
+    {
+      "id": "etl",
+      "type": "backend",
+      "label": "ETL 清洗",
+      "sublabel": "DuckDB · etl-clean",
+      "stage": 2,
+      "row": 0,
+      "tag": "SQL"
+    },
+    {
+      "id": "clean",
+      "type": "database",
+      "label": "lake/clean",
+      "sublabel": "Parquet 按天分区 · zstd",
+      "stage": 2,
+      "row": 1,
+      "tag": "166 MB"
+    },
+    {
+      "id": "training",
+      "type": "backend",
+      "label": "训练与预测",
+      "sublabel": "HistGB · MLflow + joblib",
+      "stage": 2,
+      "row": 2,
+      "tag": "MAPE 7.5%"
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Engine 查询抽象",
+      "sublabel": "双引擎双方言 SQL",
+      "stage": 3,
+      "row": 1,
+      "tag": "data-core"
+    },
+    {
+      "id": "sr",
+      "type": "database",
+      "label": "StarRocks 仓库",
+      "sublabel": "3FE + 3CN 内表",
+      "stage": 3,
+      "row": 2,
+      "tag": "10 人并发"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI",
+      "sublabel": ":8001 REST + SPA 托管",
+      "stage": 4,
+      "row": 0,
+      "tag": "HTTP"
+    },
+    {
+      "id": "vue",
+      "type": "frontend",
+      "label": "Vue Dashboard",
+      "sublabel": "ECharts · api-client",
+      "stage": 4,
+      "row": 1,
+      "tag": "build 产物"
+    },
+    {
+      "id": "streamlit",
+      "type": "frontend",
+      "label": "Streamlit",
+      "sublabel": ":8002 · Plotly 直查",
+      "stage": 4,
+      "row": 2,
+      "tag": "cache 5min"
+    }
+  ],
+  "flows": [
+    {
+      "id": "f-ingest",
+      "from": "sources",
+      "to": "raw",
+      "label": "原样落地",
+      "classification": "gen-data",
+      "variant": "emphasis"
+    },
+    {
+      "id": "f-read",
+      "from": "raw",
+      "to": "etl",
+      "label": "读取原始数据",
+      "classification": "batch"
+    },
+    {
+      "id": "f-clean",
+      "from": "etl",
+      "to": "clean",
+      "label": "去重·单位·裁剪",
+      "classification": "清洗规则",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        530,
+        109
+      ]
+    },
+    {
+      "id": "f-features",
+      "from": "clean",
+      "to": "training",
+      "label": "日订单聚合特征",
+      "classification": "lag/dow",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        556,
+        322
+      ]
+    },
+    {
+      "id": "f-forecast",
+      "from": "training",
+      "to": "clean",
+      "label": "预测 + 置信带落湖",
+      "classification": "predict",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          430,
+          385
+        ],
+        [
+          430,
+          271
+        ]
+      ],
+      "labelAt": [
+        332,
+        332
+      ]
+    },
+    {
+      "id": "f-lake-query",
+      "from": "clean",
+      "to": "engine",
+      "label": "DuckDB 直查",
+      "classification": "本地模式",
+      "variant": "emphasis",
+      "labelAt": [
+        604,
+        213
+      ]
+    },
+    {
+      "id": "f-sr-load",
+      "from": "clean",
+      "to": "sr",
+      "label": "FILES 批量导入",
+      "classification": "sr-load",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          655,
+          271
+        ],
+        [
+          655,
+          385
+        ]
+      ],
+      "labelAt": [
+        663,
+        324
+      ]
+    },
+    {
+      "id": "f-sr-query",
+      "from": "sr",
+      "to": "engine",
+      "label": "内表 SQL",
+      "classification": "集群模式",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelAt": [
+        884,
+        318
+      ]
+    },
+    {
+      "id": "f-api",
+      "from": "engine",
+      "to": "api",
+      "label": "查询结果 JSON",
+      "classification": "REST"
+    },
+    {
+      "id": "f-vue",
+      "from": "api",
+      "to": "vue",
+      "label": "/api REST",
+      "classification": "类型化契约",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [
+        1058,
+        235
+      ]
+    },
+    {
+      "id": "f-st",
+      "from": "engine",
+      "to": "streamlit",
+      "label": "进程内直查",
+      "classification": "零 HTTP 跳",
+      "labelAt": [
+        856,
+        415
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "湖仓主链路",
+      "items": [
+        "混合源(文件+数据库)原样入湖, 清洗后按天分区落 Parquet(zstd)",
+        "本地模式 DuckDB 直查湖, 零外部依赖即可完整运行",
+        "清洗规则可量化: 单位修正 150,608 行 · 去重 1,254 · 裁剪 8,656"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "双引擎切换",
+      "items": [
+        "Engine 按 settings.starrocks.enabled 自动选择 DuckDB 或 StarRocks",
+        "业务 SQL 双方言集中在 data-core/queries.py, 两端共享",
+        "FILES 直读湖上 Parquet 入内表, make sr-verify 做行数对账"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "双看板对比",
+      "items": [
+        "Vue 走 FastAPI(HTTP 一跳, 类型化 api-client), Streamlit 进程内直查(缓存 5 分钟)",
+        "两套看板页面逐一对齐: 概览 / 传感器分析(异常检测) / 订单预测",
+        "训练产物 joblib 快照与 forecast Parquet 均回湖, 看板只读湖"
+      ]
+    }
+  ]
+}
