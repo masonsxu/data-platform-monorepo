@@ -1,0 +1,13 @@
+{
+  "name": "data-platform-monorepo",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev": "turbo run dev --filter=@data-platform/dashboard",
+    "build": "turbo run build",
+    "check": "turbo run check"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}

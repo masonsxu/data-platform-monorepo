@@ -1,0 +1,20 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "Query API service (FastAPI) over DuckDB/StarRocks"
+requires-python = ">=3.12"
+dependencies = [
+    "data-core",
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+]
+
+[project.scripts]
+serve = "api.main:main"
+
+[build-system]
+requires = ["uv_build>=0.8,<1"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "api"

@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.turbo/
+
+# Data lake & artifacts
+lake/
+mlruns/
+mlflow.db
+*.sqlite
+*.db
+
+# Env
+.env
+config/settings.local.toml
+
+# OS
+.DS_Store
+
+# build artifacts
+tsconfig.tsbuildinfo

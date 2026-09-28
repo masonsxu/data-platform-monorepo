@@ -1,0 +1,11 @@
+[project]
+name = "data-core"
+version = "0.1.0"
+description = "Shared config, lake layout and query engine (DuckDB | StarRocks)"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.2",
+    "polars>=1.20",
+    "pandas>=2.2",
+    "pymysql>=1.1",
+]
