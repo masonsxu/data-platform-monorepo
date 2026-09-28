@@ -1,4 +1,12 @@
-# Streamlit 配置(按运行目录查找: Makefile 从 repo root 启动 make st)
+# Streamlit 配置(按运行目录查找; Makefile 从 repo root 启动 make st)
+[server]
+# 正式部署: headless 模式(不自动开浏览器, 不显示邮箱提示), 端口由启动参数传入
+headless = true
+
 [client]
 # 正式环境隐藏右上角开发者选项(deploy / rerun / clear cache), 保留打印/主题等 viewer 项
 toolbarMode = "viewer"
+
+[browser]
+# 关闭匿名使用遥测
+gatherUsageStats = false
